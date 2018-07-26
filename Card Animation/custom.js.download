@@ -1,0 +1,615 @@
+(function($) {
+  /**
+   * Copyright 2012, Digital Fusion
+   * Licensed under the MIT license.
+   * http://teamdf.com/jquery-plugins/license/
+   *
+   * @author Sam Sehnert
+   * @desc A small plugin that checks whether elements are within
+   *     the user visible viewport of a web browser.
+   *     only accounts for vertical position, not horizontal.
+   */
+
+  $.fn.visible = function(partial) {
+
+      var $t            = $(this),
+          $w            = $(window),
+          viewTop       = $w.scrollTop(),
+          viewBottom    = viewTop + $w.height(),
+          _top          = $t.offset().top,
+          _bottom       = _top + $t.height(),
+          compareTop    = partial === true ? _bottom : _top,
+          compareBottom = partial === true ? _top : _bottom;
+
+    return ((compareBottom <= viewBottom) && (compareTop >= viewTop));
+
+  };
+
+})(jQuery);
+
+(function( $ ) {
+
+  $(document).ready(function(){
+    $('.team-members-wrapper .cat-name').first().addClass('cat-active');
+    $('.team-members-wrapper .cat-name').first().next('.team-members').addClass('cat-active').show();
+    $('.cat-name a').on('click', function(x){
+      x.preventDefault();
+      $(this).parents('.cat-wrapper').siblings('.cat-wrapper').children('.cat-name').removeClass('cat-active');
+      $(this).parents('.cat-wrapper').children('.cat-name').toggleClass('cat-active');
+      $(this).parents('.cat-wrapper').siblings('.cat-wrapper').children('.team-members').removeClass('member-active').slideUp()
+      $(this).parents('.cat-wrapper').children('.team-members').find( '.team-member').removeClass('animated fadeInUp');
+      $(this).parents('.cat-wrapper').children('.team-members').toggleClass('members-active').slideToggle(500, function(){
+
+
+            var secOffset = $(this).prev().offset().top,
+                headerHt =$('#main-header').outerHeight();
+            if( $(window).width() < 768){
+
+              console.log(secOffset);
+              console.log(headerHt);
+              setTimeout(function(){
+                $('html, body').animate({ scrollTop: secOffset - headerHt }, '1500');
+              },300);
+
+            }else{
+
+
+              setTimeout(function(){
+                $('html, body').animate({ scrollTop: secOffset - headerHt - 36 }, '1500');
+              },300);
+
+
+            }
+        });
+      // $(this).parent().next('.team-members').toggleClass('members-active').slideToggle(500, function(){
+      //   //console.log($(this));
+      //   var secOffset=$(this).prev().offset().top,
+      //       headerHt=$('#main-header').outerHeight();
+      //       if( $(window).width() < 768){
+      //         $('html').animate({ scrollTop: secOffset - headerHt }, '1500');
+      //       }else{
+      //         $('html').animate({ scrollTop: secOffset - headerHt - 36 }, '1500');
+      //       }
+      // });
+      // $(this).next('.team-members').find('.team-member').removeClass('animated fadeInUp');
+
+
+      // var headerHt=$('#main-header').outerHeight(),
+      //           el=$(this);
+      // $('html, body').animate({
+      //     scrollTop: el.offset().top - headerHt
+      // }, 500);
+    });
+
+
+    // $('.cat-name a').click(function() {
+  	//   if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'')
+  	// 	  || location.hostname == this.hostname) {
+    //
+  	// 	var target = $(this.hash);
+  	// 	target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+  	// 	if (target.length) {
+  	// 	  $('html,body').animate({
+  	// 		scrollTop: target.offset().top-$('#main-header').height()
+  	// 	  }, 1000);
+  	// 	  return false;
+  	// 	}
+  	//   }
+  	// });
+
+
+    //team info and video
+    $(document).on('click', '.team-member .play-pause-btn', function (e) {
+      var video = $(this).parent().children('video').get(0);
+      //console.log(video.paused);
+
+      if (video.paused === false) {
+          video.pause();
+          $(this).parent().addClass('paused');
+      } else {
+          video.play();
+          $(this).parent().removeClass('paused');
+      }
+
+      return false;
+  });
+		$('.team-thumbnail .member-pic').on('click',function(e){
+			e.preventDefault();
+      $('.member-video-block').removeClass('paused');
+
+			if(!$(this).closest('li.team-member').hasClass('is_epanded')){
+
+				$('li.team-member').find('video').removeAttr('src');
+				if($(window).width()>768){
+					var videoThumbnail = $(this).data('video');
+					var videoPoster = $(this).data('poster');
+					$(this).closest('li.team-member').find('video').attr({
+						'poster': videoPoster,
+						'autoplay': true,
+						'src': videoThumbnail,
+						'loop': true
+					});
+					$(this).closest('li.team-member').find('video').attr('src', videoThumbnail);
+					if($(this).closest('li.team-member').find('video').length>0){
+						$(this).closest('li.team-member').find('video')[0].play();
+					}
+				}
+					$('li.team-member').removeClass('is_epanded');
+					$(this).closest('li.team-member').addClass('is_epanded');
+          var picHt= $(".is_epanded .member-pic").outerHeight(),
+              headerHt=$('#main-header').outerHeight();
+
+          //console.log(picHt);
+          setTimeout(function(){
+            $('html, body').animate({
+                scrollTop: $(".is_epanded").offset().top + picHt -headerHt
+            }, 500);
+          },300);
+
+			}else{
+				$('li.team-member').find('video').removeAttr('src');
+				$(this).closest('li.team-member').removeClass('is_epanded');
+				$('li.team-member').removeClass('is_epanded');
+			}
+		});
+		$('.detail-box-closer').on('click',function(){
+      var $li=$(this).closest('li.team-member');
+			$li.removeClass('is_epanded');
+				$('li.team-member').find('video').removeAttr('src');
+        var headerHt=$('#main-header').outerHeight();
+        setTimeout(function(){
+					$('html, body').animate({
+					    scrollTop: $li.offset().top - headerHt - 30
+					}, 500);
+				},0);
+		});
+		$('.arrows-right').on('click',function(){
+			$(this).closest('li.team-member').next('li.team-member').find('.member-pic').trigger('click');
+			//console.log(($(this).closest('li.team-member').index()+1)%3 == 0);
+			if(($(this).closest('li.team-member').index()+1)%3 == 0){
+        var picHt= $(".is_epanded .member-pic").outerHeight(),
+            headerHt=$('#main-header').outerHeight();
+
+        //console.log(picHt);
+				setTimeout(function(){
+					$('html, body').animate({
+					    scrollTop: $(".is_epanded").offset().top + picHt -headerHt
+					}, 500);
+				},300);
+			}
+		});
+		$('.arrows-left').on('click',function(){
+			$(this).closest('li.team-member').prev('li.team-member').find('.member-pic').trigger('click');
+      var picHt= $(".is_epanded .member-pic").outerHeight(),
+          headerHt=$('#main-header').outerHeight();
+
+      //console.log(picHt);
+      setTimeout(function(){
+        $('html, body').animate({
+            scrollTop: $(".is_epanded").offset().top + picHt -headerHt
+        }, 500);
+      },300);
+		});
+
+    $('.mobile_menu_bar_toggle').on('click', function(){
+      $('html').toggleClass('menu-opened');
+    });
+	});
+
+
+
+  //code for animation
+  var $window = $(window),
+    win_height_padded = $window.height();
+    $window.on('scroll load', revealOnScroll);
+
+    function revealOnScroll() {
+        var scrolled = $window.scrollTop(),
+            win_height_padded = $window.height()+200,
+            isTouch = Modernizr.touch;
+
+         if (isTouch) {
+             $('.revealOnScroll').addClass('animated');
+             $('html').addClass('loaded');
+         }
+
+        // Showed...
+        $(".revealOnScroll:not(.animated):not(.team-member)").each(function() {
+            var $this = $(this),
+                offsetTop = $this.offset().top;
+
+            if (scrolled + win_height_padded > offsetTop) {
+                if ($this.data('timeout')) {
+                    window.setTimeout(function() {
+                        $this.addClass('animated ' + $this.data('animation'));
+                    }, parseInt($this.data('timeout'), 10));
+                } else {
+                    $this.addClass('animated ' + $this.data('animation'));
+                }
+            }
+        });
+        // Hidden...
+        $(".revealOnScroll.animated").each(function(index) {
+            var $this = $(this),
+                offsetTop = $this.offset().top;
+            if (scrolled + win_height_padded < offsetTop) {
+                //$(this).removeClass('animated fadeInUp flipInX lightSpeedIn')
+            }
+        });
+        if($(".animated-svg").length){
+        var scrolled = $window.scrollTop(),
+        win_height_padded = $window.height()-60,
+        isTouch = Modernizr.touch;
+        if (isTouch) {
+            $('html').addClass('loaded');
+        }
+          var $this = $(".animated-svg"),
+          offsetTop = $this.offset().top;
+
+          if (scrolled + win_height_padded > offsetTop) {
+            $('html').addClass('loaded');
+          }
+        }
+
+    }
+
+
+    $(document).ready(function  () {
+      $('.our_resturents_top_sec ').on('click', function  () {
+        var $this = $(this);
+        $this.next(0).slideToggle().parent(0).siblings().find(".our_resturents_detials").slideUp(0);
+        $this.parent(0).toggleClass("active_resturents").siblings().removeClass("active_resturents");
+        var $width = $( window ).width();
+           if($width > 767){
+          $this.find("video").get(0).play();
+         }
+
+
+        $('html, body').animate({
+          scrollTop: $this.offset().top
+        }, 600);
+
+      });
+
+
+      jQuery(document).bind('gform_confirmation_loaded', function(event, formId){
+
+
+              $('html, body').animate({
+                scrollTop: $("#gform_confirmation_wrapper_1").offset().top - 250
+              }, 400);
+
+        });
+
+      $(".ginput_container_date input").attr( 'readOnly' , 'true' );
+      $('.play-btn').on('click', function  () {
+        var videoBanner = $(this).data('video');
+        $('.poup_video_wraper_main').fadeIn().find("video").attr('src', videoBanner).get(0).play();
+      });
+
+      $('.close_btn').on('click', function  () {
+        $('.poup_video_wraper_main').fadeOut().find("video").get(0).pause();
+        $('.poup_video_wraper').removeClass('paused');
+      });
+
+      $(document).on('click', '.poup_video_wraper .play-pause-btn', function (e) {
+        var video = $(this).parent().children('video').get(0);
+
+        if (video.paused === false) {
+            video.pause();
+            $(this).parent().addClass('paused');
+        } else {
+            video.play();
+            $(this).parent().removeClass('paused');
+        }
+
+        return false;
+    });
+
+      $('.animate_elements .et_pb_text_inner>*').each(function(){
+        $(this).addClass('ae-'+($(this).index()+1));
+      });
+
+
+
+      if($(".team-member").length){
+        function filterByTop(top) {
+          return function(i) { return $(this).offset().top == top; };
+        }
+        var firstmatch = $('.team-member:first');
+        $(window).on('load resize',function(){
+            var rowSz = $('.team-member').filter(filterByTop(firstmatch.offset().top)).length;
+            $('.team-member').each(function(){
+                $(this).removeClass('ae-2 ae-3 ae-4');
+                $(this).addClass('ae-'+ (($(this).index()%rowSz) + 2));
+            });
+        });
+      }
+
+      var $width = $( window ).width();
+      //console.log($width);
+      if( $('html').hasClass('no-touch') ) {
+        if($width > 767){
+          $('.our_resturents').each(function() {
+            var $this = $(this);
+
+            $this.on("mouseover", function() {
+
+              $this.find('video').get(0).play();
+            });
+            $this.on("mouseout", function() {
+
+                $this.find("video").get(0).pause();
+
+            });
+          });
+        }
+      }
+    });
+
+
+var $contact_bottom = $(".conact-video-sec");
+if($contact_bottom.length){
+    $contact_bottom.find("video").get(0).play();
+
+    $contact_bottom.on("mouseover", function() {
+
+              $contact_bottom.find('video').get(0).pause();
+            });
+            $contact_bottom.on("mouseout", function() {
+
+                $contact_bottom.find("video").get(0).play();
+
+            });
+
+}
+
+    $('.career-form-block .career-form-container .upload-btn input').change(function() {
+      var fileName = $(this).val();
+      if(fileName.length >0){
+        var file=$('.career-form-block .career-form-container .upload-btn input')[0].files[0].name;
+        $(this).parents('.career-form-block').children().find('small').html("( "+file+" )");
+      }
+      else{
+        $(this).parents('.career-form-block').children().find('small').html("( .PDF, .DOC and .DOCX files only )");
+      }
+    });
+
+
+    $(window).on('load scroll',function(){
+      var allMods = $('[class*="ae-"]');
+      allMods.each(function(i, el) {
+        var el = $(el);
+        if (el.visible(true)) {
+          el.addClass('imIn');
+        }
+      });
+  });
+    function validateEmail(sEmail) {
+          var filter = /^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+          if (filter.test(sEmail)) {
+              return true;
+          }
+          else {
+              return false;
+          }
+      }
+  $(document).ready(function(){
+    $('.career-form-container .form-field1 input').on('keyup', function(){
+      var value = $(this).val();
+      $('#input_3_2').val(value);
+      if($(this).is(':valid')){
+        $(this).removeClass('invalid');
+        $(this).parent().removeClass('invalid');
+      }
+    });
+
+    var form = $('.eposeSub');
+    var formMessages = $('.epose-response-container p');
+
+        form.on('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var formData = form.serialize();
+
+            var sEmail = $('#EmailAddress').val();
+              if ($.trim(sEmail).length == 0) {
+                  $('.epose-response-container p').fadeIn().removeClass("success_mg").text('Please enter valid email address');
+                  e.preventDefault();
+                  return false;
+              }
+              if (validateEmail(sEmail)) {
+                  $('.epose-response-container p').fadeIn().addClass("success_mg").text('...');
+                  $.ajax({
+                      type: 'POST',
+                      url: "/wp-content/themes/upward/modal-action.php",
+                      data: formData
+                  }).done(function(response) {
+                    //console.log(typeof response);
+                    
+                      // Clear the form.
+                      $('#EmailAddress').val('');
+
+                    if (response == '0'){
+                      $(formMessages).removeClass('success_mg');
+                      $(formMessages).addClass('error');
+                      $(formMessages).text("This email is already registered.");
+                    }
+                    if (response == '1'){
+                      $(formMessages).removeClass('error');
+                      $(formMessages).addClass('success_mg');
+                      $(formMessages).text("Thank you for joining ePosse. You can look forward to a WELCOME message in your inbox shortly.");
+                    }
+                    if (response != '0' && response != '1') {
+                      $(formMessages).removeClass('success_mg');
+                      $(formMessages).addClass('error');
+                      $(formMessages).text(response);
+                    }
+                  }).fail(function(data) {
+                      // Make sure that the formMessages div has the 'error' class.
+                      $(formMessages).removeClass('success_mg');
+                      $(formMessages).addClass('error');
+
+                      // Set the message text.
+                      if (data.responseText !== '') {
+                          $(formMessages).text(data.responseText);
+                      } else {
+                          $(formMessages).text('Oops! An error occured and your message could not be sent.');
+                      }
+                  });
+              }
+              else {
+                  $('.epose-response-container p').fadeIn().removeClass("success_mg").text('Invalid Email Address');
+                  e.preventDefault();
+                  return false;
+              }
+          });
+    // $('.career-form-container .form-field2 input').on('keyup', function(){
+    //   var value = $(this).val();
+    //   $('#input_3_3').val(value);
+    // });
+    $('.career-form-container .form-field2 input').on('keyup', function(){
+      var value = $(this).val();
+      $('#input_3_3').val(value);
+      if($(this).is(':valid')){
+        $(this).removeClass('invalid');
+        $(this).parent().removeClass('invalid');
+      }
+    });
+    $('.career-form-container .form-field3 input').on('keyup', function(){
+      var value = $(this).val();
+      $('#input_3_4').val(value);
+      if($(this).is(':valid')){
+        $(this).removeClass('invalid');
+        $(this).parent().removeClass('invalid');
+      }
+    });
+    $('.career-form-block .career-form-container .upload-btn').on('click', function(){
+      $('#input_3_5').trigger('click');
+    });
+    $('.career-form-block #input_3_5').change(function(){
+      var fileName = $(this).val();
+      var extension=$(this).val().replace(/^.*\./, '');
+      if(fileName.length >0){
+        var file=$('.career-form-block #input_3_5')[0].files[0].name;
+        $(this).parents('.career-form-block').children().find('small').html("( "+file+" )");
+      }
+      else{
+
+        $(this).parents('.career-form-block').children().find('small').html("( .PDF, .DOC and .DOCX files only )");
+
+      }
+
+      if(extension== "pdf" || extension == "PDF"  || extension == "doc" || extension == "DOC" || extension == "docx" || extension == "DOCX" ){
+        $('.file-restriction').removeClass('invalid');
+      }else{
+        if(fileName.length >0){
+          $('.file-restriction').addClass('invalid');
+        }
+        else{
+          $('.file-restriction').removeClass('invalid');
+        }
+
+      }
+    });
+
+    $('.career-form-block .submit-container input').on('click', function(x){
+      x.preventDefault();
+      if($('.career-form-container .form-field1 input').is(':valid') && $('.career-form-container .form-field2 input').is(':valid') && $('.career-form-container .form-field3 input').is(':valid') && !$('.file-restriction').hasClass('invalid')){
+        $('#gform_submit_button_3').trigger('click');
+        $('.career-form-container input:invalid').removeClass('invalid');
+        $('.career-form-container input:invalid').parent().removeClass('invalid');
+        setTimeout(function(){
+					$('.career-form-container input[type="text"], .career-form-container input[type="email"]').val('');
+          $(this).parents('.career-form-block').children().find('small').html("( .PDF, .DOC and .DOCX files only )");
+				},300);
+
+      }else{
+        $('.career-form-container input:invalid').addClass('invalid');
+        $('.career-form-container input:invalid').parent().addClass('invalid');
+
+      }
+    });
+
+
+
+
+
+    //new career form
+    $('#career-form-new .gform_body .gform_fields li.file-field .screen-reader-text').html("( .PDF, .DOC and .DOCX files only )");
+    $('#career-form-new .gform_body .gform_fields li.file-field .validation_message').html("(.PDF, .DOC and .DOCX files only)");
+    $('#career-form-new .gform_body .gform_fields li.name-field').append('<div class="gfield_description validation_message">(Name is required)</div>');
+    $('#career-form-new .gform_body .gform_fields li.email-field').append('<div class="gfield_description validation_message">(Email is required)</div>');
+    $('#career-form-new input[type="file"]').change(function() {
+      var extension=$(this).val().replace(/^.*\./, '');
+      var fileName = $(this).val();
+      if(fileName.length >0){
+        var file=$('#career-form-new input[type="file"]')[0].files[0].name;
+        $('#career-form-new .gform_body .gform_fields li.file-field .screen-reader-text').html("( "+file+" )");
+      }
+      else{
+        $('#career-form-new .gform_body .gform_fields li.file-field .screen-reader-text').html("( .PDF, .DOC and .DOCX files only )");
+      }
+      if(extension== "pdf" || extension == "PDF"  || extension == "doc" || extension == "DOC" || extension == "docx" || extension == "DOCX" ){
+        // $('#career-form-new .file-restrict').removeClass('invalid');
+        $('#career-form-new .file-field').removeClass('invalid');
+      }else{
+        if(fileName.length >0){
+          $('#career-form-new .file-field').addClass('invalid');
+          $('#career-form-new .gform_body .gform_fields li.file-field .validation_message').html("(.PDF, .DOC and .DOCX files only)");
+        }
+        else{
+          $('#career-form-new .file-field').removeClass('invalid');
+        }
+
+      }
+    });
+
+    $('#career-form-new .gform_body .gform_fields li.email-field input[type="text"]').on('blur', function(){
+      var sEmail = $(this).val();
+      if (validateEmail(sEmail)) {
+        $('#career-form-new .gform_body .gform_fields li.email-field').removeClass('invalid');
+      }else{
+        $('#career-form-new .gform_body .gform_fields li.email-field').addClass('invalid');
+      }
+    });
+
+    $('#career-form-new .gform_body .gform_fields li.name-field input[type="text"]').on('blur', function(){
+      if( !$(this).val() ) {
+        $('#career-form-new .gform_body .gform_fields li.name-field').addClass('invalid');
+      }else{
+        $('#career-form-new .gform_body .gform_fields li.name-field').removeClass('invalid');
+      }
+    });
+    $('#career-form-new .gform_footer input').on('click', function(x){
+      if(!$('#career-form-new .gform_body .gform_fields li.name-field input[type="text"]').val()){
+        $('#career-form-new .gform_body .gform_fields li.name-field').addClass('invalid');
+        x.preventDefault();
+      }else if (!validateEmail($('#career-form-new .gform_body .gform_fields li.email-field input[type="text"]').val())) {
+        $('#career-form-new .gform_body .gform_fields li.email-field').addClass('invalid');
+        x.preventDefault();
+      }else if(!$('#career-form-new input[type="file"]').val().length > 0){
+          $('#career-form-new .gform_body .gform_fields li.file-field .screen-reader-text').html("( .PDF, .DOC and .DOCX files only )");
+          $('#career-form-new .gform_body .gform_fields li.file-field .validation_message').html("(.PDF, .DOCX or .DOC file is required)");
+          $('#career-form-new .file-field').addClass('invalid');
+          x.preventDefault();
+      }else if($('#career-form-new .gform_body .gform_fields li.name-field input[type="text"]').val() && validateEmail($('#career-form-new .gform_body .gform_fields li.email-field input[type="text"]').val()) && !$('#career-form-new .gform_body .gform_fields li.invalid').length){
+        // $('#career-form-new .gform_footer input').unbind('click').click();
+        $('#career-form-new form').submit();
+      }
+    });
+
+    //end career form
+  })
+
+  if($("#gform_wrapper_1").length){
+  gform.addFilter( 'gform_datepicker_options_pre_init', function( optionsObj, formId, fieldId ) {
+    if ( formId == 1 ) {
+      optionsObj.minDate = 0;
+      optionsObj.maxDate = '+2 Y';
+
+    }
+    return optionsObj;
+  } );
+}
+})(jQuery);
