@@ -1,2 +1,2 @@
-# HELLO
-TESTING GIT
+# CARD ANIMATION
+Card Animations with delay
